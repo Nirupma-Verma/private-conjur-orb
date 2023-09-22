@@ -6,8 +6,12 @@ description: >
 usage:
   version: 2.1
   orbs:
-    <orb-name>: <namespace>/<orb-name>@1.2.3
+    private-conjur: attempt/private-conjur@1.2.3
   workflows:
     use-my-orb:
       jobs:
-        - <orb-name>/<job-name>
+        - private-conjur/retrieve_secret:
+            url: "https://conjur_appliance_url"
+            account: "myaccount"
+            service_id: "circleci"
+            secrets: "secret2|sql_username;secret1;"
