@@ -6,10 +6,10 @@ load ./retrieve_secret.sh
 # Test case for check_parameter function with missing CONJUR_APPLIANCE_URL
 @test "Missing CONJUR_APPLIANCE_URL parameter" {
   # Set the required parameters
-  status=0
+
   PARAM_APPLIANCE_URL="https://your-conjur-appliance-url"
   run check_parameter "CONJUR_APPLIANCE_URL" "$PARAM_APPLIANCE_URL"
-  [ "$status" -eq "0" ]
+  [ "$status" -eq 0 ]
 }
 
 # Test case for check_parameter function with missing OIDC Token
@@ -41,7 +41,7 @@ load ./retrieve_secret.sh
 
   # Run the main function
   run main
-   status="0"
+  status="0"
   # Check the status and output
   [ "$status" -eq 0 ]
 }
