@@ -13,6 +13,7 @@ function main() {
   CONJUR_ACCOUNT=$(eval echo "${PARAM_ACCOUNT}")
   CONJUR_SERVICE_ID=$(eval echo "${PARAM_SERVICE_ID}")
 
+
   if [ -z "${CIRCLE_OIDC_TOKEN_V2}" ]; then
     echo "OIDC Token cannot be found. A CircleCI context must be specified."
     exit 1
@@ -76,7 +77,7 @@ function InstallJq() {
 function authenticate(){
   local jwt_token="${CIRCLE_OIDC_TOKEN_V2}"
   local response_code
-  ### Fetch Conjur Access Token        
+  ### Fetch Conjur Access Token
   if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
       echo "::debug Authenticating with certificate"
       response_code=$(curl --cacert "conjur_${CONJUR_ACCOUNT}.pem" -s -w "%{http_code}" -o /tmp/token.txt --request POST "${CONJUR_APPLIANCE_URL}/authn-jwt/${CONJUR_SERVICE_ID}/${CONJUR_ACCOUNT}/authenticate" --header "Content-Type: application/x-www-form-urlencoded" --header "Accept-Encoding: base64" --data-urlencode "jwt=$jwt_token")
@@ -88,8 +89,8 @@ function authenticate(){
   if [ "$response_code" != "200" ]; then
       echo "Autentication Failed."
       exit 1
-  else 
-      echo "Authentication Successful."   
+  else
+      echo "Authentication Successful."
       token=$(cat /tmp/token.txt)
   fi
 }
@@ -99,7 +100,7 @@ function fetch_secret() {
 
   for secret in "${SECRETS[@]}"; do
     IFS='|'
-    read -ra METADATA <<< "$secret" 
+    read -ra METADATA <<< "$secret"
 
     if [[ "${#METADATA[@]}" == 2 ]]; then
         secretId=$(urlencode "${METADATA[0]}")
@@ -107,18 +108,18 @@ function fetch_secret() {
     else
         secretId=${METADATA[0]}
         IFS='/'
-        read -ra SPLITSECRET <<< "$secretId" 
-        arrLength=${#SPLITSECRET[@]} 
-        lastIndex=$((arrLength-1)) 
+        read -ra SPLITSECRET <<< "$secretId"
+        arrLength=${#SPLITSECRET[@]}
+        lastIndex=$((arrLength-1))
         envVar=${SPLITSECRET[$lastIndex]^^}
         secretId=$(urlencode "${METADATA[0]}")
     fi
-    secretMulti["$secretId"]="$envVar" 
-  done 
+    secretMulti["$secretId"]="$envVar"
+  done
 
   #### Construct comma-delimited resource IDs of the variables.
   secretsPath=()
-  for key in "${!secretMulti[@]}"; do 
+  for key in "${!secretMulti[@]}"; do
     secretsPath+=("${CONJUR_ACCOUNT}"":variable:""$key")
   done
 
@@ -134,12 +135,12 @@ function fetch_secret() {
     secretsVal=$(curl -H "Authorization: Token token=\"$token\"" "${CONJUR_APPLIANCE_URL}/secrets?variable_ids=${secrets_string}" | jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")')
   fi
 
-  #### If Batch retrieval of secrets not found 
+  #### If Batch retrieval of secrets not found
   if [[ "${secretsVal}" == *"is empty or not found"* ]]; then
     echo "${secretsVal}. Batch retrieval failed, falling to single secret fetch."
     flag=false
     err_msg="Secret(s) are empty or not found :: "
-    for secretId in "${!secretMulti[@]}"; do 
+    for secretId in "${!secretMulti[@]}"; do
       if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
           echo "::debug Retrieving secret with certificate"
           secretVal=$(curl --cacert "conjur_${CONJUR_ACCOUNT}.pem" -H "Authorization: Token token=\"$token\"" "${CONJUR_APPLIANCE_URL}/secrets/${CONJUR_ACCOUNT}/variable/$secretId")
@@ -154,7 +155,7 @@ function fetch_secret() {
       elif [[ "${secretVal}" == *"is empty or not found"* ]]; then
           flag=true
           err_msg+="${secretId}, "
-      else 
+      else
           echo "export ${secretMulti[$secretId]}=${secretVal}" >> "${BASH_ENV}" # Set environment variable
           echo "Secret fetched successfully.  Environment variable ${secretMulti[$secretId]} set. "
       fi
@@ -165,9 +166,9 @@ function fetch_secret() {
       exit 1
     fi
   else
-    echo "Batch retrieval of secrets succeeded."  
-    ######set environment variable 
-    multiple_secrets="${secretsVal[0]}" 
+    echo "Batch retrieval of secrets succeeded."
+    ######set environment variable
+    multiple_secrets="${secretsVal[0]}"
 
     IFS=','
     read -ra comma_split <<< "$multiple_secrets"
@@ -179,12 +180,12 @@ function fetch_secret() {
         value="${equal_split[1]}"
 
         IFS=':'
-        read -ra colon_split <<< "$key" 
+        read -ra colon_split <<< "$key"
         secret_key=$(urlencode "${colon_split[-1]}")
 
         if [ "${PARAM_INTEGR}" == "true" ]; then
           echo "Secret fetched successfully. fetched :: $value"
-        else  
+        else
           echo "export ${secretMulti[$secret_key]}=$value" >> "${BASH_ENV}"
           echo "Secret fetched successfully.  Environment variable ${secretMulti[$secret_key]} set. "
         fi

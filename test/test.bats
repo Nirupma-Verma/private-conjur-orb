@@ -74,7 +74,7 @@ setup(){
 @test "11: authenticate should exit with code 1 when response_code is not 200" {
   run authenticate
   assert_failure
-  [ "$status" -eq 1 ] 
+  [ "$status" -eq 1 ]
   assert_output --partial "Autentication Failed."
 }
 
@@ -87,7 +87,7 @@ setup(){
 
   run authenticate
   assert_success
-  [ "$status" -eq 0 ] 
+  [ "$status" -eq 0 ]
   assert_output  "conjur_access_token"
 }
 
@@ -98,7 +98,7 @@ setup(){
   fetch_secret() {
     "${mock_curl}" "$@"
   }
-  
+
   fetch_secret
 
   echo ":::::: $status ,,,, $output"
