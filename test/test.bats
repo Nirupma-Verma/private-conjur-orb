@@ -75,7 +75,7 @@ setup(){
   run authenticate
   assert_failure
   [ "$status" -eq 1 ] 
-  assert_output --partial "Autentication Failed."
+  assert_output --partial "Authentication Failed."
 }
 
 @test "12: authenticate should exit with code 0 when response_code is 200" {

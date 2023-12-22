@@ -73,49 +73,67 @@ function InstallJq() {
     fi
 }
 
-function authenticate(){
+function network_client() {
+  local method="$1"
+  local url="$2"
+  local data=""
+  local response
+
+  declare -a common_curl_options=()
+  
+  if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
+    common_curl_options+=("--cacert" "conjur_${CONJUR_ACCOUNT}.pem")
+  fi
+
+  case "$method" in
+    "POST")
+      data="$3"
+      common_curl_options+=("--request" "$method" "$url" "--header" 'Content-Type: application/x-www-form-urlencoded' "--header" "Accept-Encoding: base64" "--data-urlencode" "$data")
+      ;;
+    "GET")
+      common_curl_options+=("$url" "--header" "Authorization: Token token=\"$token\"")
+      ;;
+    *)
+      echo "Unsupported HTTP method: $method"
+      exit 1
+      ;;
+  esac
+
+  response=$(curl "${common_curl_options[@]}")
+  
+  if [ "$method" == "POST" ]; then
+    token="$response"
+  else
+    result="$response"
+  fi
+}
+
+function authenticate() {
   local jwt_token="${CIRCLE_OIDC_TOKEN_V2}"
-  local response_code
-  ### Fetch Conjur Access Token        
-  if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
-    echo "::debug Authenticating with certificate"
-    response_code=$(curl --cacert "conjur_${CONJUR_ACCOUNT}.pem" -s -w "%{http_code}" -o /tmp/token.txt --request POST "${CONJUR_APPLIANCE_URL}/authn-jwt/${CONJUR_SERVICE_ID}/${CONJUR_ACCOUNT}/authenticate" --header "Content-Type: application/x-www-form-urlencoded" --header "Accept-Encoding: base64" --data-urlencode "jwt=$jwt_token")
-  else
-    echo "::debug Authenticating without certificate"
-    response_code=$(curl -s -w "%{http_code}" -o /tmp/token.txt --request POST "${CONJUR_APPLIANCE_URL}/authn-jwt/${CONJUR_SERVICE_ID}/${CONJUR_ACCOUNT}/authenticate" --header 'Content-Type: application/x-www-form-urlencoded' --header "Accept-Encoding: base64" --data-urlencode "jwt=$jwt_token")
-  fi
 
-  if [ "$response_code" != "200" ]; then
-    echo "Autentication Failed."
+  network_client "POST" "${CONJUR_APPLIANCE_URL}/authn-jwt/${CONJUR_SERVICE_ID}/${CONJUR_ACCOUNT}/authenticate" "jwt=$jwt_token"
+
+  if [ -z "${token}" ]; then
+    echo "Authentication Failed."
     exit 1
-  else 
-    echo "Authentication Successful."   
-    token=$(cat /tmp/token.txt)
+  else  
+    echo "Authentication Successful."
   fi
 }
 
-function multiple_secrets_fetch(){
-  ##### Batch retrieval of secrets
-  if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
-    echo "::debug Retrieving multiple secrets with certificate"
-    secretsVal=$(curl --cacert "conjur_${CONJUR_ACCOUNT}.pem" -H "Authorization: Token token=\"$token\"" "${CONJUR_APPLIANCE_URL}/secrets?variable_ids=${secrets_string}" | jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")')
-  else
-    echo "::debug Retrieving multiple secret without certificate"
-    secretsVal=$(curl -H "Authorization: Token token=\"$token\"" "${CONJUR_APPLIANCE_URL}/secrets?variable_ids=${secrets_string}" | jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")')
-  fi
+function multiple_secrets_fetch() {
+  network_client "GET" "${CONJUR_APPLIANCE_URL}/secrets?variable_ids=${secrets_string}"
+  secretsVal=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' <<< "${result}")
 }
 
-function single_secret_fetch(){
-  flag=false
-  err_msg="Secret(s) are empty or not found :: "
-  for secretId in "${!secretMulti[@]}"; do 
-    if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
-      echo "::debug Retrieving secret with certificate"
-      secretVal=$(curl --cacert "conjur_${CONJUR_ACCOUNT}.pem" -H "Authorization: Token token=\"$token\"" "${CONJUR_APPLIANCE_URL}/secrets/${CONJUR_ACCOUNT}/variable/$secretId")
-    else
-      echo "::debug Retrieving secret without certificate"
-      secretVal=$(curl -H "Authorization: Token token=\"$token\"" "${CONJUR_APPLIANCE_URL}/secrets/${CONJUR_ACCOUNT}/variable/$secretId")
-    fi
+function single_secret_fetch() {
+  local flag=false
+  local err_msg="Secret(s) are empty or not found :: "
+
+  for secretId in "${!secretMulti[@]}"; do
+    network_client "GET" "${CONJUR_APPLIANCE_URL}/secrets/${CONJUR_ACCOUNT}/variable/$secretId"
+
+    local secretVal="${result}"
 
     if [[ "${secretVal}" == "Malformed authorization token" ]]; then
       echo "::error::Malformed authorization token. Please check your Conjur account, username, and API key. If using authn-jwt, check your Host ID annotations are correct."
@@ -123,9 +141,9 @@ function single_secret_fetch(){
     elif [[ "${secretVal}" == *"is empty or not found"* ]]; then
       flag=true
       err_msg+="${secretId}, "
-    else 
-      echo "export ${secretMulti[$secretId]}=${secretVal}" >> "${BASH_ENV}" # Set environment variable
-      echo "Secret fetched successfully.  Environment variable ${secretMulti[$secretId]} set. "
+    else
+      echo "export ${secretMulti[$secretId]}=${secretVal}" >>"${BASH_ENV}" # Set environment variable
+      echo "Secret fetched successfully. Environment variable ${secretMulti[$secretId]} set. "
     fi
   done
 
@@ -136,7 +154,8 @@ function single_secret_fetch(){
 }
 
 function set_environment_var(){
-  multiple_secrets="${secretsVal[0]}" 
+  local multiple_secrets="${secretsVal[0]}" 
+  local secret_key
 
   IFS=','
   read -ra comma_split <<< "$multiple_secrets"
@@ -145,8 +164,8 @@ function set_environment_var(){
     IFS='='
     read -ra equal_split <<< "$element"
 
-    key="${equal_split[0]}"
-    value="${equal_split[1]}"
+    local key="${equal_split[0]}"
+    local value="${equal_split[1]}"
 
     IFS=':'
     read -ra colon_split <<< "$key" 
@@ -165,6 +184,8 @@ function set_environment_var(){
 
 function fetch_secret() {
   declare -A secretMulti
+  local secretId
+  local secrets_string
 
   for secret in "${SECRETS[@]}"; do
     IFS='|'
@@ -177,16 +198,16 @@ function fetch_secret() {
       secretId=${METADATA[0]}
       IFS='/'
       read -ra SPLITSECRET <<< "$secretId" 
-      arrLength=${#SPLITSECRET[@]} 
-      lastIndex=$((arrLength-1)) 
-      envVar=${SPLITSECRET[$lastIndex]^^}
+      local arrLength=${#SPLITSECRET[@]} 
+      local lastIndex=$((arrLength-1)) 
+      local envVar=${SPLITSECRET[$lastIndex]^^}
       secretId=$(urlencode "${METADATA[0]}")
     fi
     secretMulti["$secretId"]="$envVar" 
   done 
 
   #### Construct comma-delimited resource IDs of the variables.
-  secretsPath=()
+  local secretsPath=()
   for key in "${!secretMulti[@]}"; do 
     secretsPath+=("${CONJUR_ACCOUNT}"":variable:""$key")
   done
