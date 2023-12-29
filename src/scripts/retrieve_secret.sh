@@ -73,6 +73,10 @@ function InstallJq() {
     fi
 }
 
+function simple_curl(){
+  curl -s -m 2 http://www.google.com 
+}
+
 function network_client() {
   local method="$1"
   local url="$2"
@@ -99,6 +103,7 @@ function network_client() {
       ;;
   esac
 
+  # echo "curl :: ${common_curl_options[@]}"
   response=$(curl "${common_curl_options[@]}")
   
   if [ "$method" == "POST" ]; then

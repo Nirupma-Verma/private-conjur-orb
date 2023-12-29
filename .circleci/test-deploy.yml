@@ -29,21 +29,26 @@ jobs:
       image: ubuntu-2204:2022.04.2
     steps:
       - checkout
+      # - private-conjur/retrieve_secret:
+      #     secrets: "data/circleci/apps/safe/secret2|sql_username;data/circleci/apps/safe/secret1;"
       - private-conjur/retrieve_secret:
-          secrets: "data/circleci/apps/safe/secret2|sql_username;data/circleci/apps/safe/secret1;"
+          url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
+          account: "conjur"
+          service_id: "circleci2"
+          secrets: "data/vault/ADO_Secret/ado_secret_apikey/password;"
       - run:
           name: "Print secret"
           command: |
             echo "================"
-            echo "secret1: $SECRET1 "
+            echo "secret1: $USERNAME "
             echo "secret2: $SQL_USERNAME"
             echo "================"   
       - private-conjur/test:
           target: 'oss'  
       - private-conjur/test:
-          target: 'cloud'     
-      - private-conjur/test:
-          target: 'enterprise'
+          target: 'cloud' 
+      # - private-conjur/test:
+      #     target: 'enterprise'
 workflows:
   test-deploy:
     jobs:
