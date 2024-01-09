@@ -42,6 +42,7 @@ jobs:
           target: 'oss'  
       - private-conjur/test:
           target: 'cloud' 
+      - private-conjur/retrieve_secret:
           url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
           account: "conjur"
           service_id: "circleci2"
