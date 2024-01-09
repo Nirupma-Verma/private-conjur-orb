@@ -41,7 +41,11 @@ jobs:
       - private-conjur/test:
           target: 'oss'  
       - private-conjur/test:
-          target: 'cloud'     
+          target: 'cloud' 
+          url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
+          account: "conjur"
+          service_id: "circleci2"
+          secrets: "data/vault/ADO_Secret/ado_secret_apikey/address|sql_username;data/vault/ADO_Secret/ado_secret_apikey/password;"
       # - private-conjur/test:
       #     target: 'enterprise'
 workflows:
