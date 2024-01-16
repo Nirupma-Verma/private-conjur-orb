@@ -148,7 +148,7 @@ function configureConjur() {
   clientExec conjur variable values add conjur/authn-jwt/circleci1/audience "56ee901c-258a-4318-9e77-a59fa0c6b976"
   clientExec conjur variable values add conjur/authn-jwt/circleci1/identity-path "data/circleci/apps"
   clientExec conjur variable values add conjur/authn-jwt/circleci1/token-app-property "oidc.circleci.com/project-id"
-  clientExec conjur variable values add "data/circleci/apps/safe/base @%^%&^secret1" "SECRETXcLhn23MJcimV?:{%^%^!@#$%&*(_+=~<>?/|\DSDsdsd)}"
+  clientExec conjur variable values add data/circleci/apps/safe/secret1 SECRETXcLhn23MJcimV
   clientExec conjur variable values add data/circleci/apps/safe/secret2 '&&@~`)^%#:"":" SECRETX@#@$#@%$@%$@'
 }
 
