@@ -65,7 +65,7 @@ function checkTarget() {
     export CONJUR_WAIT_COMMAND="conjurctl wait"
     ;;
   "enterprise")
-    export DOCKER_COMPOSE_ARGS="-f docker-compose.enterprise.yml -f docker-compose.yml"
+    export DOCKER_COMPOSE_ARGS="-f docker-compose.enterpise.yml -f docker-compose.yml"
     export CONJUR_WAIT_COMMAND="/opt/conjur/evoke/bin/wait_for_conjur"
     ;;
     "cloud")
