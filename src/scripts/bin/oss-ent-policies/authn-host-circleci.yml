@@ -19,7 +19,7 @@
   body:
   - &circleci-secrets
     - !variable
-      id: "base @%^%&^secret1"
+      id: "secret1"
       owner: !group ../../admins
     - !variable
       id: secret2
