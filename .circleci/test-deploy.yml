@@ -41,7 +41,7 @@ jobs:
           command: |
             echo "================"
             echo "secret1: $SECRET1"
-            echo "secret2: $SECRET2"
+            echo "secret2: $SQL_USERNAME"
             echo "================"   
       - private-conjur/test:
           target: 'oss'  
