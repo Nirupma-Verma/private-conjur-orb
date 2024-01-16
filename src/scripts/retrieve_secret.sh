@@ -18,7 +18,9 @@ function main() {
     exit 1
   fi
 
-  echo "${CONJUR_CERTIFICATE}" > conjur_"${CONJUR_ACCOUNT}".pem
+  if [[ -n "${CONJUR_CERTIFICATE}" ]]; then
+   echo "${CONJUR_CERTIFICATE}" > conjur_"${CONJUR_ACCOUNT}".pem
+  fi
   echo "::debug Authenticate via Authn-JWT"
 
   array_secrets
