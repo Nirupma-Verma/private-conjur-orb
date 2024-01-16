@@ -31,8 +31,7 @@ jobs:
       - checkout
       # - private-conjur/retrieve_secret:
       #     secrets: "data/circleci/apps/safe/secret1;"
-      # - private-conjur/retrieve_secret:
-      #     secrets: "data/circleci/apps/safe/secret3;"
+      
       # - run:
       #     name: "Print secret"
       #     command: |
@@ -44,6 +43,15 @@ jobs:
           target: 'oss'  
       - private-conjur/test:
           target: 'cloud' 
+      - private-conjur/retrieve_secret:
+          secrets: "data/circleci/apps/safe/secret3;data/circleci/apps/safe/secret2;"
+      - run:
+          name: "Print secret"
+          command: |
+            echo "================"
+            echo "secret1: $SECRET2"
+            echo "secret2: $SECRET3"
+            echo "================" 
       # - private-conjur/test:
       #     target: 'enterprise'
 workflows:
