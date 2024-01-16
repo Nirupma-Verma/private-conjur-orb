@@ -34,14 +34,14 @@ jobs:
       - private-conjur/retrieve_secret:
           url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
           account: "conjur"
-          service_id: "circleci2"
-          secrets: "data/vault/ADO_Secret/ado_secret_apikey/address|sql_username;data/vault/ADO_Secret/ado_secret_apikey/password;"
+          service_id: "circleci1"
+          secrets: "data/circleci/apps/safe/secret1;data/circleci/apps/safe/secret2"
       - run:
           name: "Print secret"
           command: |
             echo "================"
-            echo "secret1: $PASSWORD"
-            echo "secret2: $SQL_USERNAME"
+            echo "secret1: $SECRET1"
+            echo "secret2: $SECRET2"
             echo "================"   
       - private-conjur/test:
           target: 'oss'  
