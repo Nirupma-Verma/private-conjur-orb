@@ -30,7 +30,7 @@ jobs:
     steps:
       - checkout
       - private-conjur/retrieve_secret:
-          secrets: "data/circleci/apps/safe/secret6|sql_username;data/circleci/apps/safe/secret1;"
+          secrets: "data/circleci/apps/safe/secret1;"
       # - private-conjur/retrieve_secret:
       #     url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
       #     account: "conjur"
