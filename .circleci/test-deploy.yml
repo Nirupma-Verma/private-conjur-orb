@@ -33,13 +33,13 @@ jobs:
       #     secrets: "data/circleci/apps/safe/secret1;"
       - private-conjur/retrieve_secret:
           secrets: "data/circleci/apps/safe/secret1;data/circleci/apps/safe/secret2;"
-      # - run:
-      #     name: "Print secret"
-      #     command: |
-      #       echo "================"
-      #       echo "secret1: $SECRET1"
-      #       echo "secret2: $SECRET2"
-      #       echo "================"   
+      - run:
+          name: "Print secret"
+          command: |
+            echo "================"
+            echo "secret1: $SECRET1"
+            echo "secret2: $SECRET2"
+            echo "================"   
       # - private-conjur/test:
       #     target: 'oss'  
       # - private-conjur/test:
