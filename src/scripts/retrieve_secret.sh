@@ -149,7 +149,7 @@ function single_secret_fetch() {
       flag=true
       err_msg+="${secretId}, "
     else
-      echo "export ${secretMulti[$secretId]}=${secretVal}" > "${BASH_ENV}" # Set environment variable
+      echo "export ${secretMulti[$secretId]}=${secretVal}" >> "$BASH_ENV" # Set environment variable
       echo "Secret fetched successfully. Environment variable ${secretMulti[$secretId]} set. "
     fi
   done
@@ -181,7 +181,7 @@ function set_environment_var(){
     if [ "${PARAM_INTEGR}" == "true" ]; then
       echo "Secret fetched successfully. fetched :: $value"
     else  
-      echo "export ${secretMulti[$secret_key]}=$value" > "${BASH_ENV}"
+      echo "export ${secretMulti[$secret_key]}=$value" >> "$BASH_ENV"
       echo "Secret fetched successfully.  Environment variable ${secretMulti[$secret_key]} set. "
     fi
     IFS=','
