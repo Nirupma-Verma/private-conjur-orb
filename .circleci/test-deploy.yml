@@ -34,8 +34,8 @@ jobs:
       - private-conjur/retrieve_secret:
           url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
           account: "conjur"
-          service_id: "circleci2"
-          secrets: "data/vault/ADO_Secret/ado_secret_apikey/password;"
+          service_id: "circleci1"
+          secrets: "data/circleci/apps/safe/secret1;data/circleci/apps/safe/secret2"
       - run:
           name: "Print secret"
           command: |
