@@ -29,13 +29,13 @@ jobs:
       image: ubuntu-2204:2022.04.2
     steps:
       - checkout
-      # - private-conjur/retrieve_secret:
-      #     secrets: "data/circleci/apps/safe/secret2|sql_username;data/circleci/apps/safe/secret1;"
       - private-conjur/retrieve_secret:
-          url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
-          account: "conjur"
-          service_id: "circleci1"
-          secrets: "data/circleci/apps/safe/secret2;"
+          secrets: "data/circleci/apps/safe/secret2|sql_username;data/circleci/apps/safe/secret1;"
+      # - private-conjur/retrieve_secret:
+      #     url: "https://conjurcloudint.secretsmgr.cyberark.cloud/api"    
+      #     account: "conjur"
+      #     service_id: "circleci1"
+      #     secrets: "data/circleci/apps/safe/secret2;"
       - run:
           name: "Print secret"
           command: |
