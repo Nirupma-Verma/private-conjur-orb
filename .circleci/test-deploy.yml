@@ -44,13 +44,13 @@ jobs:
       # - private-conjur/test:
       #     target: 'cloud' 
       - private-conjur/retrieve_secret:
-          secrets: "data/circleci/apps/safe/secret3;data/circleci/apps/safe/secret2;"
+          secrets: "data/circleci/apps/safe/secret3|SQL USER;data/circleci/apps/safe/secret2;"
       - run:
           name: "Print secret"
           command: |
             echo "================"
             echo "secret1: $SECRET2"
-            echo "secret2: $SECRET3"
+            echo "secret2: $SQL USER"
             echo "================" 
       # - private-conjur/test:
       #     target: 'enterprise'
