@@ -44,7 +44,7 @@ jobs:
       # - private-conjur/test:
       #     target: 'cloud' 
       - private-conjur/retrieve_secret:
-          secrets: "data/circleci/apps/safe/secret3;data/circleci/apps/safe/secret2;"
+          secrets: "data/circleci/apps/safe/secret3;data/circleci/apps/safe/secret20;"
       - run:
           name: "Print secret"
           command: |
