@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  conjur-circleci: cyberark/conjur-circleci@0.0.1
-
+  conjur-circleci: cyberark/conjur-circleci-orb@0.0.1
+  
 jobs:
   test-conjur:
     docker:
