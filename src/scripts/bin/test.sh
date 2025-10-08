@@ -96,12 +96,12 @@ function launchConjur() {
   else
     # We need to wait for Conjur OSS to establish a DB connection before
     # attempting to create the account
-    conjurExec $CONJUR_WAIT_COMMAND
+    conjurExec "$CONJUR_WAIT_COMMAND"
     conjurExec conjurctl account create "$CONJUR_ACCOUNT"
   fi
 
   echo ">> Waiting on conjur..."
-  conjurExec $CONJUR_WAIT_COMMAND
+  conjurExec "$CONJUR_WAIT_COMMAND"
 }
 
 function configureConjur() {
