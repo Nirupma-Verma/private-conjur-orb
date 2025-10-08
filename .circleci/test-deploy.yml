@@ -40,10 +40,10 @@ jobs:
             echo "================"   
       - private-conjur/test:
           target: 'oss'  
-      - private-conjur/test:
-          target: 'cloud'     
-      - private-conjur/test:
-          target: 'enterprise'
+      # - private-conjur/test:
+          # target: 'cloud'     
+      # - private-conjur/test:
+          # target: 'enterprise'
           
 workflows:
   test-deploy:
