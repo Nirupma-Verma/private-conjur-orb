@@ -23,10 +23,10 @@ jobs:
   # Create jobs to test the commands of your orbs.
   # You may want to add additional validation steps to ensure the commands are working as expected.
   command-test:
-    # docker:
-    #   - image: cimg/base:current
-    machine:
-      image: ubuntu-2204:2022.04.2
+    docker:
+      - image: cimg/base:current
+    # machine:
+    #   image: ubuntu-2204:2022.04.2
     steps:
       - checkout
       - private-conjur/retrieve_secret:
